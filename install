@@ -1,2 +1,3 @@
 cp dream /usr/local/bin/dream
-cp bootstrap.scm /usr/local/bin/bootstrap.scm
+mkdir -p /usr/local/lib/dream
+cp bootstrap.scm /usr/local/lib/dream/bootstrap.scm

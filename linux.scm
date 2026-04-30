@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Linux Kernel Interface;;;
@@ -16,8 +16,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define STDIN 0)
 (define STDOUT 1)
-(define FCGI_IN_OUT -2)
-(define STDERR (if LIBFCGI FCGI_IN_OUT 2))
+(define STDERR 2)
 (define O_RDONLY 0)
 (define O_WRONLY 1)
 (define O_CREAT 64)
@@ -46,8 +45,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (exit-with-code x)
-(if LIBFCGI
-  (calln (@ 'FCGX_Finish)))
   (mov x ebx)
   (mov SYS_EXIT eax)
   (int #x80))
@@ -56,39 +53,10 @@
 ;;;Initialize Default Input and Output Ports;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (: 'initialize_ports)
-(if LIBFCGI
-  (mov (object INPUT_PORT FCGI_IN_OUT) (@ 'current_input_port))
-  (mov (object INPUT_PORT STDIN) (@ 'current_input_port)))
+  (mov (object INPUT_PORT STDIN) (@ 'current_input_port))
   (add 8 FREE)
-(if LIBFCGI
-  (mov (object OUTPUT_PORT FCGI_IN_OUT) (@ 'current_output_port))
-  (mov (object OUTPUT_PORT STDOUT) (@ 'current_output_port)))
+  (mov (object OUTPUT_PORT STDOUT) (@ 'current_output_port))
   (add 8 FREE)
-(if LIBFCGI
-  (begin
-    (push 1)
-    (push 'fcgi_name)
-    (calln (@ 'dlopen_rel))
-    (mov eax (@ 'fcgi))
-    (add 8 esp)
-    (test eax eax)
-    (jzl 'error_no_fcgi)
-    (for-each
-      (lambda (x)
-        (push (car x))
-        (push (@ 'fcgi))
-        (calln (@ 'dlsym_rel))
-        (add 8 esp)
-        (test eax eax)
-        (jzl 'error_no_fcgi)
-        (mov eax (@ (cdr x))))
-      '((fcgx_finish_name . FCGX_Finish)
-        (fcgx_getchar_name . FCGX_GetChar)
-        (fcgx_putchar_name . FCGX_PutChar)
-        (fcgx_putstr_name . FCGX_PutStr)
-        (fcgx_accept_name . FCGX_Accept)
-        (fcgx_getparam_name . FCGX_GetParam)
-        (fcgx_fflush_name . FCGX_FFlush)))))
   (ret)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -98,9 +66,7 @@
   (lea (@ 12 SP) TEMP)
   (cmp 0 (@ TEMP))
   (jnz 'command_line_begin)
-(if LIBFCGI
-  (exit-with-code 0)
-  (ret))
+  (ret)
 (: 'command_line_begin)
   (mov 'exit_not_ok (@ 'error_continuation))
 (: 'command_line_loop)
@@ -119,17 +85,6 @@
 (: 'getch)
   (pusha)
   (mov 0 (@ 'input))
-(if LIBFCGI
- (begin
-  (cmp FCGI_IN_OUT (@ 'io_file))
-  (ife
-   (begin
-    (push (@ 'fcgx_in))
-    (calln (@ 'FCGX_GetChar))
-    (add 4 esp)
-    (mov eax (@ 'input))
-    (popa)
-    (ret)))))
   (mov (@ 'io_file) ebx) ;File descriptor
   (mov 'input ecx)       ;Buffer
   (mov 1 edx)            ;Count
@@ -150,21 +105,6 @@
 ;;Display character in output (byte) to file given in io_file (tetra)
 (: 'putch)
   (pusha)
-(if LIBFCGI
- (begin
-  (cmp FCGI_IN_OUT (@ 'io_file))
-  (ife
-   (begin
-    (push (@ 'fcgx_out))
-    (clear eax)
-    (movb (@ 'output) eax)
-    (push eax)
-    (calln (@ 'FCGX_PutChar))
-    (add 8 esp)
-    (cmp -1 eax)
-    (jel 'error_io)
-    (popa)
-    (ret)))))
   (mov (@ 'io_file) ebx) ;File descriptor
   (mov 'output ecx)      ;Buffer
   (mov 1 edx)            ;Count
@@ -175,42 +115,10 @@
   (popa)
   (ret)
 
-(if LIBFCGI
- (let ((content-type "Content-Type: text/html\n\n"))
-  (: 'content_type)
-    (asciz content-type)
-  (: 'insure_content_type)
-   (cmp 0 (@ 'fcgi))
-   (je 'no_content_type)
-   (pusha)
-   (cmp 0 (@ 'fcgx_out))
-   (ife (call 'call_fcgx_accept))
-   (push (@ 'fcgx_out))
-   (push (string-length content-type))
-   (push 'content_type)
-   (calln (@ 'FCGX_PutStr))
-   (add 12 esp)
-   (popa)
-  (: 'no_content_type)
-   (ret)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Display string at ecx with length in str_len to file given in io_file (tetra)
 (: 'puts)
   (pusha)
-(if LIBFCGI
- (begin
-  (cmp FCGI_IN_OUT (@ 'io_file))
-  (ife
-   (begin
-    (push (@ 'fcgx_out))
-    (push (@ 'str_len))
-    (push ecx)
-    (calln (@ 'FCGX_PutStr))
-    (add 12 esp)
-    (test eax eax)
-    (jsl 'error_io)
-    (popa)
-    (ret)))))
   (mov (@ 'io_file) ebx) ;File descriptor
   (mov (@ 'str_len) edx) ;Count
   (mov SYS_WRITE eax)
@@ -449,70 +357,3 @@
 (: 'dlcall_null)
   (push 0)
   (jmp 'dlcall_loop_begin)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(if LIBFCGI
-  (begin
-   (: 'call_fcgx_accept)
-    (push 'fcgx_envp)
-    (push 'fcgx_err)
-    (push 'fcgx_out)
-    (push 'fcgx_in)
-    (calln (@ 'FCGX_Accept))
-    (add 16 esp)
-    (ret)
-
-    (new-additional-primitive "fcgx-accept?")
-    (insure-no-more-args ARGL)
-    (pusha)
-    (call 'call_fcgx_accept)
-    (test eax eax)
-    (jsl 'fcgx_accept_false)
-    (mov (@ 'current_input_port) ARGL)
-    (mov (@ ARGL) TEMP)
-    (and! #xfdffffff TEMP) ;Reset EOF condition
-    (mov TEMP (@ ARGL))
-    (popa)
-    (jmpl 'return_true)
-   (: 'fcgx_accept_false)
-    (popa)
-    (jmpl 'return_false)
-
-    (new-additional-primitive "fcgx-finish")
-    (insure-no-more-args ARGL)
-    (pusha)
-    (calln (@ 'FCGX_Finish))
-    (test eax eax)
-    (jsl 'fcgx_finish_false)
-    (popa)
-    (jmpl 'return_true)
-   (: 'fcgx_finish_false)
-    (popa)
-    (jmpl 'return_false)
-
-    (new-additional-primitive "fcgx-flush")
-    (insure-no-more-args ARGL)
-    (pusha)
-    (push (@ 'fcgx_out))
-    (calln (@ 'FCGX_FFlush))
-    (add 4 esp)
-    (popa)
-    (ret)
-    
-    (new-additional-primitive "fcgx-getparam")
-    (call 'get_last_string)
-    (pusha)
-    (push (@ 'fcgx_envp))
-    (push (@ 4 ARGL))
-    (calln (@ 'FCGX_GetParam))
-    (add 8 esp)
-    (mov eax (@ 'io_file))
-    (popa)
-    (mov (@ 'io_file) eax)
-    (test eax eax)
-    (jzl 'return_false)
-    (call 'make_immutable_string)
-    (mov (@ VAL) TEMP)
-    (shr LENGTH_SHIFT TEMP) ;string length
-    (mov (@ 4 VAL) UNEV)
-    (jmpl 'substring_unev_temp)))

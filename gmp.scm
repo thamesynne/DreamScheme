@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (: 'gmp_name)
   (asciz LIBGMP)
@@ -10,12 +10,12 @@
   (cmp 0 (@ 'gmp))
   (ifz
     (begin
-      (if (not WINDOWS) (push 1))
+      (push 1)
       (push 'gmp_name)
       (cmp 0 (@ 'dlopen_rel))
       (jzl 'error_no_bignums)
       (calln (@ 'dlopen_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'gmp))))
@@ -31,7 +31,7 @@
       (push 'mpn_add_name)
       (push (@ 'gmp))
       (calln (@ 'dlsym_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'mpn_add))))
@@ -47,7 +47,7 @@
       (push 'mpn_sub_name)
       (push (@ 'gmp))
       (calln (@ 'dlsym_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'mpn_sub))))
@@ -63,7 +63,7 @@
       (push 'mpn_mul_name)
       (push (@ 'gmp))
       (calln (@ 'dlsym_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'mpn_mul))))
@@ -79,7 +79,7 @@
       (push 'mpn_divrem_name)
       (push (@ 'gmp))
       (calln (@ 'dlsym_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'mpn_divrem))))
@@ -95,7 +95,7 @@
       (push 'mpn_gcd_name)
       (push (@ 'gmp))
       (calln (@ 'dlsym_rel))
-      (if (not WINDOWS) (add 8 esp))
+      (add 8 esp)
       (test eax eax)
       (jzl 'error_no_bignums)
       (mov eax (@ 'mpn_gcd))))

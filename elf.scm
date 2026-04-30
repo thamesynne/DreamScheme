@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;
 ;;; ELF Header ;;;
@@ -31,7 +31,7 @@
 (tetras 1     ;ELF Version (Current)
        'start ;Entry Point
        (file-offset 'program_header) ;Program Header File Offset
-       0 ;Section Table File Offset
+       (file-offset 'section_table_start) ;Section Table File Offset
        0)     ;Processor-specific Flags
 (wydes (file-offset 'program_header)   ;ELF Header Size
        #x20   ;Program Header Table Entry Size
@@ -88,6 +88,11 @@
         7                ;Segment Flags (read+write+execute)
         #x1000           ;Segment Alignment
         )
+;;
+;;Section table
+;;
+(: 'section_table_start)
+(tetras 0 0 0 0 0 0 0 0 0 0) ;Nevermind
 
 (: 'hash)
   (tetras 1 5 0 1 2 3 4 0)

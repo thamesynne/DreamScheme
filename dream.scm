@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Initialize Global Symbols;;;
@@ -21,6 +21,7 @@
   special-symbols)
 
   (call 'initialize_ports)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Initialize Numeric Tower Procedure Vector;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -656,7 +657,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (: 'error_undefined_var)
 (new-message 'msg_undefined_var " is undefined yet evaluated")
-(if LIBFCGI (call 'insure_content_type))
   (mov EXP VAL)
   (mov STDERR (@ 'io_file))
   (call 'write_dispatch)
@@ -851,10 +851,6 @@
 (make-errors "expected_simple_type" "expected_paren" "extra_eol" "invalid_pair"
              "invalid_index" "string_too_large" "vector_too_large" "overflow"
              "no_bignums" "divide_by_zero" "unknown_literal")
-(if LIBFCGI
- (begin
-  (new-message 'msg_no_fcgi "Could not load FCGI library")
-  (make-errors "no_fcgi")))
 
 (: 'error_eof)
 (new-message 'msg_eof "End of file encountered")
@@ -868,7 +864,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (: 'error_msg)
-(if LIBFCGI (call 'insure_content_type))
 (: 'error_msg_continue)
   (mov STDERR (@ 'io_file))
   (call 'puts)
@@ -905,9 +900,9 @@
   (mov (@ 'stackbase) SP)
   (mov 0 (@ 'root))
   (clear VAL EXP UNEV ARGL)
-  (if LIBFCGI
-    (jmpl 'exit_not_ok)
-    (jmpn (@ 'error_continuation)))
+  ;;; (jmpl 'exit_not_ok) ; d'oh! That was if LIBFCGI was TRUE!
+  (jmpn (@ 'error_continuation))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (: 'error_out_of_memory)
@@ -917,7 +912,7 @@
   (call 'puts)
   (movb 10 (@ 'output))
   (call 'putch)
-  (exit-with-code -1)
+  (exit-with-code -2)
 
 ;;;;;;;;;;;
 ;;;Forms;;;
@@ -1968,6 +1963,7 @@
 
 (: 'write_symbol)
   (push UNEV)
+  (mov (@ VAL) TEMP)	; seems harmless enough after all
   (mov VAL TEMP)
   (add 4 TEMP)
   (mov TEMP UNEV)

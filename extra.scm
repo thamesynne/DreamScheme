@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Bitwise Procedures ;;
@@ -61,6 +61,8 @@
   (insure-more-args ARGL)
   (call 'get_exact_natural)
   (mov (@ 4 TEMP) VAL)
+  (test VAL VAL)
+  (jzl 'return_false)
   (mov (@ 4 ARGL) ARGL)
   (test ARGL ARGL)
   (ifnz

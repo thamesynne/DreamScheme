@@ -57,14 +57,3 @@
 (bss 'mpn_gcd 4)
 (bss 'src1size 4)
 (bss 'src2size 4)
-
-(if LIBFCGI
- (begin
-  (bss 'fcgi 4)
-  (bss 'FCGX_Finish 4)
-  (bss 'FCGX_GetChar 4)
-  (bss 'FCGX_PutChar 4)
-  (bss 'FCGX_PutStr 4)
-  (bss 'FCGX_Accept 4)
-  (bss 'FCGX_GetParam 4)
-  (bss 'FCGX_FFlush 4)))

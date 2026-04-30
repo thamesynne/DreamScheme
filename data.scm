@@ -1,8 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;This program is distributed under the terms of the       ;;;
-;;;GNU General Public License.                              ;;;
-;;;Copyright (C) 2011 David Joseph Stith                    ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;This program is distributed under the terms of the       ;;
+;;GNU General Public License.                              ;;
+;;Copyright (C) 2012 David Joseph Stith                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;
 ;;;Data;;;
@@ -71,20 +71,6 @@
 (: 'memstrnew)      (tetra 'memstr2)
 (: 'memstrlimitnew) (tetra 'memstrlimit2)
 
-(if LIBFCGI
-  (begin
-    (: 'fcgx_in)   (tetra 0)
-    (: 'fcgx_out)  (tetra 0)
-    (: 'fcgx_err)  (tetra 0)
-    (: 'fcgx_envp) (tetra 0)
-    (: 'fcgi_name)          (asciz LIBFCGI)
-    (: 'fcgx_finish_name)   (asciz "FCGX_Finish")
-    (: 'fcgx_getchar_name)  (asciz "FCGX_GetChar")
-    (: 'fcgx_putchar_name)  (asciz "FCGX_PutChar")
-    (: 'fcgx_putstr_name)   (asciz "FCGX_PutStr")
-    (: 'fcgx_accept_name)   (asciz "FCGX_Accept")
-    (: 'fcgx_getparam_name) (asciz "FCGX_GetParam")
-    (: 'fcgx_fflush_name)   (asciz "FCGX_FFlush")))
 (align 4)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
